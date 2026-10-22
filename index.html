@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Howell – Data Pengunjung Pameran Indocomtech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #1A1A2E;
+      --accent:        #E94560;
+      --accent-dark:   #c73650;
+      --gold:          #F5A623;
+      --surface:       #16213E;
+      --surface2:      #0F3460;
+      --text:          #FFFFFF;
+      --text-muted:    rgba(255,255,255,0.65);
+      --border:        rgba(255,255,255,0.12);
+      --input-bg:      rgba(255,255,255,0.06);
+      --input-focus:   rgba(233,69,96,0.18);
+      --success:       #27AE60;
+      --radius:        14px;
+      --shadow:        0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--primary);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND DECORATION ────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(233,69,96,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 110%, rgba(15,52,96,0.7) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── HERO BANNER ───────────────────────────────────────────────────── */
+    .hero {
+      width: 100%;
+      background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 60%, #12192B 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 28px 24px 22px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+    }
+
+    .hero-event-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(233,69,96,0.15);
+      border: 1px solid rgba(233,69,96,0.4);
+      border-radius: 50px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .hero-event-badge .dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.6s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .brand-logo svg { width: 38px; height: 38px; flex-shrink: 0; }
+
+    .brand-name {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #FFFFFF 30%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-sub {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .hero-tagline {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* ─── MAIN CARD ─────────────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(22,33,62,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 24px 32px;
+      margin: 24px 16px 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .card-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 26px;
+      line-height: 1.55;
+    }
+
+    /* ─── STEP INDICATOR ────────────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 26px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--input-bg);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.35s ease;
+    }
+
+    .step.active .step-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(233,69,96,0.2);
+    }
+
+    .step.done .step-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .step-label {
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    .step.active .step-label { color: var(--accent); }
+    .step.done  .step-label  { color: var(--success); }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin-bottom: 20px;
+      transition: background 0.35s ease;
+    }
+
+    .step-line.done { background: var(--success); }
+
+    /* ─── FORM ──────────────────────────────────────────────────────────── */
+    .form-section { display: none; animation: fadeSlideIn 0.35s ease; }
+    .form-section.active { display: block; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+
+    label span.req { color: var(--accent); margin-left: 2px; }
+
+    input[type="text"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      padding: 13px 15px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="tel"]::placeholder { color: rgba(255,255,255,0.3); }
+
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      background: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(233,69,96,0.12);
+    }
+
+    input.error, select.error {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+    }
+
+    .error-msg {
+      font-size: 11.5px;
+      color: #e74c3c;
+      margin-top: 5px;
+      display: none;
+    }
+
+    select option { background: #1a1a2e; color: #fff; }
+
+    /* WhatsApp prefix ---------------------------------------------------- */
+    .phone-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .phone-prefix img { width: 20px; border-radius: 3px; }
+
+    .phone-wrapper input { flex: 1; }
+
+    /* Checkbox grid ------------------------------------------------------ */
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .checkbox-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      user-select: none;
+      line-height: 1.3;
+    }
+
+    .checkbox-label .icon { font-size: 16px; flex-shrink: 0; }
+
+    .checkbox-item input:checked + .checkbox-label {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.12);
+      color: #fff;
+    }
+
+    .checkbox-item input:checked + .checkbox-label::before {
+      content: '✓';
+      position: absolute;
+      top: 6px; right: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Radio buttons ------------------------------------------------------ */
+    .radio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .radio-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .radio-item input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 14px 10px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .radio-label .r-icon { font-size: 22px; }
+
+    .radio-item input:checked + .radio-label {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.12);
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+    }
+
+    /* ─── BUTTONS ───────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #b02a43 100%);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(233,69,96,0.35);
+    }
+
+    .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(233,69,96,0.45); }
+    .btn-primary:active { transform: translateY(0px);  box-shadow: 0 4px 12px rgba(233,69,96,0.3); }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(37,211,102,0.3);
+      margin-top: 12px;
+    }
+
+    .btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,211,102,0.4); }
+
+    /* ─── SUCCESS SCREEN ────────────────────────────────────────────────── */
+    #screen-success {
+      display: none;
+      text-align: center;
+      animation: fadeSlideIn 0.5s ease;
+    }
+
+    #screen-success.show { display: block; }
+
+    .success-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--success), #1e8449);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 20px;
+      box-shadow: 0 12px 36px rgba(39,174,96,0.4);
+      animation: bounceIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+
+    @keyframes bounceIn {
+      0%   { transform: scale(0); }
+      60%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .success-sub {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .summary-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-child { border-bottom: none; }
+
+    .summary-key {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .summary-val {
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      text-align: right;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────────────────────── */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 16px 20px 24px;
+      font-size: 11px;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a { color: var(--gold); text-decoration: none; }
+
+    /* ─── LOADING SPINNER ───────────────────────────────────────────────── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────────────────── */
+    @media (max-width: 360px) {
+      .card { padding: 20px 16px 28px; }
+      .radio-grid { grid-template-columns: 1fr 1fr; }
+      .checkbox-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ HERO BANNER ═══════════════════════════════════════════════════ -->
+  <header class="hero">
+    <div class="hero-event-badge">
+      <span class="dot"></span>
+      Live · Indocomtech 2026
+    </div>
+    <div class="brand-logo">
+      <!-- Howell-style cable/connector icon -->
+      <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="38" height="38" rx="9" fill="#E94560"/>
+        <rect x="7" y="16" width="24" height="6" rx="3" fill="white"/>
+        <rect x="13" y="10" width="4" height="6" rx="2" fill="white"/>
+        <rect x="21" y="22" width="4" height="6" rx="2" fill="white"/>
+        <circle cx="15" cy="19" r="2" fill="#E94560"/>
+        <circle cx="23" cy="19" r="2" fill="#E94560"/>
+      </svg>
+      <div>
+        <div class="brand-name">HOWELL</div>
+        <div class="brand-sub">PT Howell Niaga Indonesia</div>
+      </div>
+    </div>
+    <p class="hero-tagline">
+      🎪 Selamat datang! Isi form singkat ini dan tim kami<br>siap membantu kebutuhan konektivitas Anda.
+    </p>
+  </header>
+
+  <!-- ═══ FORM CARD ══════════════════════════════════════════════════════ -->
+  <div class="card" id="main-card">
+
+    <!-- Step indicator -->
+    <div class="steps" id="step-indicator">
+      <div class="step active" id="step-1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Data Diri</div>
+      </div>
+      <div class="step-line" id="line-1-2"></div>
+      <div class="step" id="step-2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Profil</div>
+      </div>
+      <div class="step-line" id="line-2-3"></div>
+      <div class="step" id="step-3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Kebutuhan</div>
+      </div>
+    </div>
+
+    <div id="screen-form">
+      <!-- ──────────── SECTION 1 : Data Diri ──────────── -->
+      <div class="form-section active" id="section-1">
+        <p class="card-title">Data Diri</p>
+        <p class="card-sub">Masukkan informasi kontak Anda — hanya butuh ~15 detik!</p>
+
+        <div class="form-group">
+          <label for="nama">Nama Lengkap <span class="req">*</span></label>
+          <input type="text" id="nama" name="nama" placeholder="Contoh: Budi Santoso" autocomplete="name" inputmode="text" />
+          <div class="error-msg" id="err-nama">Nama lengkap wajib diisi.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="wa">No. WhatsApp <span class="req">*</span></label>
+          <div class="phone-wrapper">
+            <div class="phone-prefix">
+              <!-- Flag ID inline SVG -->
+              <svg width="20" height="14" viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="14" fill="#CE1126"/>
+                <rect y="14" width="40" height="14" fill="#FFFFFF"/>
+              </svg>
+              +62
+            </div>
+            <input type="tel" id="wa" name="wa" placeholder="812 3456 7890" inputmode="numeric" maxlength="14" />
+          </div>
+          <div class="error-msg" id="err-wa">Nomor WhatsApp tidak valid.</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="nextStep(1)">
+          Lanjut
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- ──────────── SECTION 2 : Profil Bisnis ──────────── -->
+      <div class="form-section" id="section-2">
+        <p class="card-title">Profil Bisnis</p>
+        <p class="card-sub">Kami ingin mengenal Anda lebih baik agar bisa memberikan penawaran yang tepat.</p>
+
+        <div class="form-group">
+          <label>Kategori Pengunjung <span class="req">*</span></label>
+          <div class="radio-grid">
+            <label class="radio-item">
+              <input type="radio" name="kategori" value="End User" />
+              <span class="radio-label">
+                <span class="r-icon">👤</span>
+                End User
+              </span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="kategori" value="Retailer" />
+              <span class="radio-label">
+                <span class="r-icon">🏪</span>
+                Retailer
+              </span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="kategori" value="Corporate IT" />
+              <span class="radio-label">
+                <span class="r-icon">🏢</span>
+                Corporate IT
+              </span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="kategori" value="Lainnya" />
+              <span class="radio-label">
+                <span class="r-icon">✨</span>
+                Lainnya
+              </span>
+            </label>
+          </div>
+          <div class="error-msg" id="err-kategori">Pilih kategori pengunjung.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="perusahaan">Nama Perusahaan / Badan Usaha <span class="req">*</span></label>
+          <input type="text" id="perusahaan" name="perusahaan" placeholder="Contoh: CV Maju Jaya" autocomplete="organization" />
+          <div class="error-msg" id="err-perusahaan">Nama perusahaan wajib diisi.</div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="prevStep(2)" style="margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Kembali
+        </button>
+        <button class="btn btn-primary" onclick="nextStep(2)">
+          Lanjut
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- ──────────── SECTION 3 : Kebutuhan Produk ──────────── -->
+      <div class="form-section" id="section-3">
+        <p class="card-title">Kebutuhan Produk</p>
+        <p class="card-sub">Pilih produk yang Anda butuhkan (boleh lebih dari satu).</p>
+
+        <div class="form-group">
+          <label>Kebutuhan Produk Utama <span class="req">*</span></label>
+          <div class="checkbox-grid">
+            <label class="checkbox-item">
+              <input type="checkbox" name="produk" value="Kabel Audio-Video (HDMI/DisplayPort)" />
+              <span class="checkbox-label">
+                <span class="icon">🖥️</span>
+                Kabel Audio-Video (HDMI / DisplayPort)
+              </span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="produk" value="Kabel Network/LAN" />
+              <span class="checkbox-label">
+                <span class="icon">🌐</span>
+                Kabel Network / LAN
+              </span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="produk" value="Accessories & Adapter" />
+              <span class="checkbox-label">
+                <span class="icon">🔌</span>
+                Accessories &amp; Adapter
+              </span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="produk" value="Lainnya" />
+              <span class="checkbox-label">
+                <span class="icon">📦</span>
+                Lainnya
+              </span>
+            </label>
+          </div>
+          <div class="error-msg" id="err-produk">Pilih minimal satu produk.</div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="prevStep(3)" style="margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Kembali
+        </button>
+        <button class="btn btn-primary" id="btn-submit" onclick="submitForm()">
+          <span id="btn-label">Kirim Data</span>
+          <div class="spinner" id="spinner"></div>
+          <svg id="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SUCCESS SCREEN ════════════════════════════════════════════════ -->
+    <div id="screen-success">
+      <div class="success-icon">✅</div>
+      <p class="success-title">Terima Kasih! 🎉</p>
+      <p class="success-sub">
+        Data Anda telah kami terima.<br>
+        Tim Howell akan segera menghubungi Anda<br>melalui WhatsApp dalam waktu dekat.
+      </p>
+
+      <div class="summary-box" id="summary-box"></div>
+
+      <button class="btn btn-whatsapp" onclick="openWhatsApp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Chat via WhatsApp
+      </button>
+
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="resetForm()">
+        Isi Lagi / Orang Lain
+      </button>
+    </div>
+
+  </div><!-- /card -->
+
+  <footer>
+    &copy; 2026 <a href="https://wildanfi12.github.io/Howell/" target="_blank">PT Howell Niaga Indonesia</a> &nbsp;·&nbsp;
+    Pameran <strong style="color:#E94560">Indocomtech 2026</strong>
+  </footer>
+
+  <!-- ═══ SCRIPT ════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── CONFIG ──────────────────────────────────────────────────────────
+     *  Ganti SHEET_URL dengan URL Google Apps Script Web App Anda.
+     *  Tutorial ada di README / petunjuk di bawah halaman.
+     * ────────────────────────────────────────────────────────────────── */
+    const SHEET_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_ANDA";
+    const WA_ADMIN  = "6285771666931"; // Nomor WA Tim Howell
+
+    let formData = {};
+    let currentStep = 1;
+
+    /* ── STEP NAVIGATION ────────────────────────────────────────────── */
+    function setStep(step) {
+      [1, 2, 3].forEach(i => {
+        document.getElementById(`section-${i}`).classList.toggle('active', i === step);
+        const el = document.getElementById(`step-${i}`);
+        el.classList.remove('active', 'done');
+        if (i < step)  el.classList.add('done');
+        if (i === step) el.classList.add('active');
+        // Update step circle icon for done steps
+        el.querySelector('.step-circle').innerHTML =
+          i < step
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            : i;
+      });
+      document.getElementById('line-1-2').classList.toggle('done', step > 1);
+      document.getElementById('line-2-3').classList.toggle('done', step > 2);
+      currentStep = step;
+    }
+
+    function nextStep(from) {
+      if (!validateSection(from)) return;
+      collectSection(from);
+      setStep(from + 1);
+      document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function prevStep(from) {
+      setStep(from - 1);
+      document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ── VALIDATION ─────────────────────────────────────────────────── */
+    function showErr(id, show) {
+      document.getElementById(id).style.display = show ? 'block' : 'none';
+    }
+
+    function markField(el, err) {
+      el.classList.toggle('error', err);
+    }
+
+    function validateSection(s) {
+      let ok = true;
+
+      if (s === 1) {
+        const nama = document.getElementById('nama');
+        const wa   = document.getElementById('wa');
+        const namOk = nama.value.trim().length >= 3;
+        const waOk  = /^8[0-9]{7,12}$/.test(wa.value.replace(/\s/g, ''));
+        markField(nama, !namOk); showErr('err-nama', !namOk);
+        markField(wa,   !waOk);  showErr('err-wa',   !waOk);
+        ok = namOk && waOk;
+      }
+
+      if (s === 2) {
+        const kat  = document.querySelector('input[name="kategori"]:checked');
+        const per  = document.getElementById('perusahaan');
+        const katOk = !!kat;
+        const perOk = per.value.trim().length >= 2;
+        showErr('err-kategori', !katOk);
+        markField(per, !perOk); showErr('err-perusahaan', !perOk);
+        ok = katOk && perOk;
+      }
+
+      if (s === 3) {
+        const checks = document.querySelectorAll('input[name="produk"]:checked');
+        const prOk   = checks.length > 0;
+        showErr('err-produk', !prOk);
+        ok = prOk;
+      }
+
+      return ok;
+    }
+
+    /* ── DATA COLLECTION ────────────────────────────────────────────── */
+    function collectSection(s) {
+      if (s === 1) {
+        formData.nama      = document.getElementById('nama').value.trim();
+        formData.whatsapp  = '+62' + document.getElementById('wa').value.replace(/\s/g, '');
+      }
+      if (s === 2) {
+        formData.kategori  = document.querySelector('input[name="kategori"]:checked').value;
+        formData.perusahaan = document.getElementById('perusahaan').value.trim();
+      }
+    }
+
+    /* ── SUBMIT ─────────────────────────────────────────────────────── */
+    async function submitForm() {
+      if (!validateSection(3)) return;
+
+      const produkChecked = [...document.querySelectorAll('input[name="produk"]:checked')].map(c => c.value);
+      formData.produk    = produkChecked.join(', ');
+      formData.timestamp = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+      formData.event     = 'Indocomtech 2026';
+
+      // UI: loading state
+      const btn     = document.getElementById('btn-submit');
+      const spinner = document.getElementById('spinner');
+      const label   = document.getElementById('btn-label');
+      const icon    = document.getElementById('btn-icon');
+      btn.disabled  = true;
+      spinner.style.display = 'block';
+      icon.style.display    = 'none';
+      label.textContent     = 'Mengirim...';
+
+      try {
+        /* ── Send to Google Sheets via Apps Script ───────────────── */
+        if (SHEET_URL !== "GANTI_DENGAN_URL_APPS_SCRIPT_ANDA") {
+          await fetch(SHEET_URL, {
+            method : 'POST',
+            mode   : 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(formData)
+          });
+        }
+        showSuccess();
+      } catch (e) {
+        // Tetap tampilkan success (no-cors tidak throw kecuali network error)
+        showSuccess();
+      }
+    }
+
+    /* ── SUCCESS ────────────────────────────────────────────────────── */
+    function showSuccess() {
+      document.getElementById('screen-form').style.display      = 'none';
+      document.getElementById('step-indicator').style.display   = 'none';
+      document.getElementById('screen-success').classList.add('show');
+
+      const box = document.getElementById('summary-box');
+      box.innerHTML = [
+        { k: 'Nama',       v: formData.nama },
+        { k: 'WhatsApp',   v: formData.whatsapp },
+        { k: 'Kategori',   v: formData.kategori },
+        { k: 'Perusahaan', v: formData.perusahaan },
+        { k: 'Produk',     v: formData.produk },
+      ].map(r => `
+        <div class="summary-row">
+          <span class="summary-key">${r.k}</span>
+          <span class="summary-val">${r.v}</span>
+        </div>`).join('');
+    }
+
+    /* ── WHATSAPP REDIRECT ──────────────────────────────────────────── */
+    function openWhatsApp() {
+      const msg = encodeURIComponent(
+        `Halo Tim Howell! 👋\nSaya baru mengisi form di pameran Indocomtech 2026.\n\n` +
+        `Nama: ${formData.nama}\nWA: ${formData.whatsapp}\nPerusahaan: ${formData.perusahaan}\n` +
+        `Kategori: ${formData.kategori}\nKebutuhan: ${formData.produk}\n\nMohon info lebih lanjut, terima kasih! 🙏`
+      );
+      window.open(`https://wa.me/${WA_ADMIN}?text=${msg}`, '_blank');
+    }
+
+    /* ── RESET ──────────────────────────────────────────────────────── */
+    function resetForm() {
+      formData = {};
+      document.getElementById('screen-form').style.display      = '';
+      document.getElementById('step-indicator').style.display   = '';
+      document.getElementById('screen-success').classList.remove('show');
+
+      // Clear all inputs
+      document.querySelectorAll('input[type="text"], input[type="tel"]').forEach(i => i.value = '');
+      document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i.checked = false);
+      document.querySelectorAll('.error-msg').forEach(e => e.style.display = 'none');
+      document.querySelectorAll('input.error, select.error').forEach(e => e.classList.remove('error'));
+
+      // Reset button state
+      const btn     = document.getElementById('btn-submit');
+      const spinner = document.getElementById('spinner');
+      const label   = document.getElementById('btn-label');
+      const icon    = document.getElementById('btn-icon');
+      btn.disabled  = false;
+      spinner.style.display = 'none';
+      icon.style.display    = '';
+      label.textContent     = 'Kirim Data';
+
+      setStep(1);
+    }
+
+    /* ── PHONE FORMAT ───────────────────────────────────────────────── */
+    document.getElementById('wa').addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9\s]/g, '');
+    });
+  </script>
+</body>
+</html>
