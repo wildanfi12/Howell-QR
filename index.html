@@ -113,18 +113,6 @@
     input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(208,52,44,.1)}
     .err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
 
-    /* PHONE */
-    .phone-row{display:flex;gap:8px}
-    .prefix{
-      display:flex;align-items:center;gap:6px;
-      padding:0 12px;
-      border:1.5px solid var(--gray-200);border-radius:8px;
-      font-size:14px;font-weight:600;color:var(--black);
-      background:var(--gray-50);white-space:nowrap;
-      flex-shrink:0;min-height:48px;
-    }
-    .phone-row input{flex:1}
-
     /* RADIO */
     .radio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .rc{position:relative}
@@ -242,14 +230,8 @@
 
       <div class="field">
         <label for="wa">No. WhatsApp <span class="req">*</span></label>
-        <div class="phone-row">
-          <div class="prefix">
-            <svg width="20" height="14" viewBox="0 0 40 28"><rect width="40" height="14" fill="#CE1126"/><rect y="14" width="40" height="14" fill="#fff"/></svg>
-            +62
-          </div>
-          <input type="tel" id="wa" placeholder="812 3456 7890" inputmode="numeric" maxlength="14"/>
-        </div>
-        <div class="err-msg" id="e-wa">Nomor WhatsApp tidak valid.</div>
+        <input type="tel" id="wa" placeholder="Contoh: 082250561757" inputmode="numeric" maxlength="16"/>
+        <div class="err-msg" id="e-wa">Nomor WhatsApp tidak valid (minimal 9 digit angka).</div>
       </div>
 
       <!-- Profil Bisnis -->
@@ -338,7 +320,8 @@
     const pr = [...document.querySelectorAll('input[name="pr"]:checked')];
 
     const nOk = n.value.trim().length >= 2;
-    const wOk = /^8[0-9]{7,12}$/.test(w.value.replace(/\s/g,''));
+    const cleanedWa = w.value.replace(/[^0-9]/g, '');
+    const wOk = cleanedWa.length >= 9 && cleanedWa.length <= 16;
     const kOk = !!k;
     const cOk = c.value.trim().length >= 2;
     const prOk = pr.length > 0;
@@ -359,7 +342,7 @@
     if(!validate()) return;
 
     fd.nama       = document.getElementById('nama').value.trim();
-    fd.whatsapp   = '+62' + document.getElementById('wa').value.replace(/\s/g,'');
+    fd.whatsapp   = document.getElementById('wa').value.trim();
     fd.kategori   = document.querySelector('input[name="kat"]:checked').value;
     fd.perusahaan = document.getElementById('co').value.trim();
     fd.produk     = [...document.querySelectorAll('input[name="pr"]:checked')].map(c=>c.value).join(', ');
