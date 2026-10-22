@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8"/>
@@ -129,6 +129,7 @@
 
     /* CHECKBOX */
     .chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .chk-grid.three-col{grid-template-columns:1fr 1fr 1fr}
     .cc{position:relative}
     .cc input[type=checkbox]{position:absolute;opacity:0;width:0;height:0}
     .cc-label{
@@ -260,10 +261,15 @@
       <div class="field">
         <label>Produk yang Dibutuhkan <span class="req">*</span></label>
         <div class="chk-grid">
-          <label class="cc"><input type="checkbox" name="pr" value="Kabel Audio-Video (HDMI/DisplayPort)"/><span class="cc-label"><span class="cc-box"></span>Kabel Audio-Video (HDMI / DisplayPort)</span></label>
-          <label class="cc"><input type="checkbox" name="pr" value="Kabel Network/LAN"/><span class="cc-label"><span class="cc-box"></span>Kabel Network / LAN</span></label>
-          <label class="cc"><input type="checkbox" name="pr" value="Accessories & Adapter"/><span class="cc-label"><span class="cc-box"></span>Accessories &amp; Adapter</span></label>
-          <label class="cc"><input type="checkbox" name="pr" value="Lainnya"/><span class="cc-label"><span class="cc-box"></span>Lainnya</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="HDMI 8K"/><span class="cc-label"><span class="cc-box"></span>HDMI 8K</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="LAN & Patch Cable"/><span class="cc-label"><span class="cc-box"></span>LAN &amp; Patch Cable</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="DisplayPort"/><span class="cc-label"><span class="cc-box"></span>DisplayPort</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="Power & PDU"/><span class="cc-label"><span class="cc-box"></span>Power &amp; PDU</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="USB & Data"/><span class="cc-label"><span class="cc-box"></span>USB &amp; Data</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="Audio Solutions"/><span class="cc-label"><span class="cc-box"></span>Audio Solutions</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="Adapters"/><span class="cc-label"><span class="cc-box"></span>Adapters</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="TWS & Audio"/><span class="cc-label"><span class="cc-box"></span>TWS &amp; Audio</span></label>
+          <label class="cc"><input type="checkbox" name="pr" value="DVI & VGA"/><span class="cc-label"><span class="cc-box"></span>DVI &amp; VGA</span></label>
         </div>
         <div class="err-msg" id="e-pr">Pilih minimal satu produk.</div>
       </div>
