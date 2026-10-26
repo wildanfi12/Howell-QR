@@ -2,42 +2,20 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Howell – Registrasi Pengunjung Indocomtech 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --black:#0D0D0D;
-      --yellow:#FFCB00;
-      --yellow-dk:#E6B700;
-      --white:#FFFFFF;
-      --gray-50:#FAFAFA;
-      --gray-100:#F2F2F2;
-      --gray-200:#E4E4E4;
-      --gray-400:#ADADAD;
-      --gray-600:#666;
-      --gray-800:#333;
-      --green:#22A956;
-      --red:#D0342C;
-      --r:10px;
-    }
-    body{
-      font-family:'Inter',system-ui,sans-serif;
-      background:var(--gray-100);
-      color:var(--black);
-      min-height:100dvh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-    }
+    :root{--black:#11120F;--yellow:#FFCB00;--yellow-dk:#E6B700;--white:#FFF;--gray-50:#FAFAF8;--gray-100:#F3F2ED;--gray-200:#E6E5DF;--gray-400:#A6A69F;--gray-600:#696A65;--gray-800:#343530;--green:#22A956;--red:#D0342C;--r:16px}
+    body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(ellipse at 50% 190px,rgba(255,203,0,.12),transparent 440px),var(--gray-100);color:var(--black);min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 
     /* HEADER */
     .header{
       width:100%;
       background:var(--black);
-      padding:24px 20px 20px;
+      padding:28px 20px 54px;position:relative;background-image:radial-gradient(ellipse at 50% -40%,rgba(255,203,0,.16),transparent 62%);
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -69,26 +47,17 @@
       flex-shrink:0;
     }
 
+    .header-kicker{margin-top:20px;color:rgba(255,255,255,.68);font-size:10px;font-weight:700;letter-spacing:1.5px;text-align:center;text-transform:uppercase}.header-kicker span{color:var(--yellow);margin-left:6px}
     /* CARD */
-    .card{
-      width:100%;max-width:460px;
-      background:var(--white);
-      border-radius:var(--r);
-      box-shadow:0 2px 20px rgba(0,0,0,0.08);
-      margin:24px 16px 32px;
-      overflow:hidden;
-    }
-    .card-top{height:4px;background:var(--yellow)}
-    .card-body{padding:28px 24px 32px}
-
-    .form-title{font-size:18px;font-weight:700;color:var(--black);margin-bottom:4px}
-    .form-sub{font-size:13px;color:var(--gray-600);margin-bottom:24px;line-height:1.5}
+    .card{width:calc(100% - 32px);max-width:520px;background:var(--white);border:1px solid rgba(17,18,15,.05);border-radius:var(--r);box-shadow:0 18px 55px rgba(22,23,18,.11),0 2px 8px rgba(22,23,18,.04);margin:-28px 16px 30px;position:relative;overflow:hidden}
+    .card-top{height:5px;background:linear-gradient(90deg,#FFCB00,#FFE47A,#FFCB00)}
+    .card-body{padding:32px 32px 36px}
+    .form-title{font-size:21px;font-weight:700;color:var(--black);margin-bottom:7px;letter-spacing:-.55px}
+    .form-sub{font-size:13px;color:var(--gray-600);margin-bottom:26px;line-height:1.65}
 
     /* DIVIDER LINE */
     .section-label{
-      font-size:11px;font-weight:700;color:var(--gray-400);
-      text-transform:uppercase;letter-spacing:0.8px;
-      margin:20px 0 14px;
+      font-size:10px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:1.1px;margin:25px 0 15px;
       display:flex;align-items:center;gap:10px;
     }
     .section-label::before,.section-label::after{content:'';flex:1;height:1px;background:var(--gray-200)}
@@ -99,9 +68,7 @@
     .field label .req{color:var(--red)}
 
     input[type=text],input[type=tel]{
-      width:100%;padding:13px 14px;
-      border:1.5px solid var(--gray-200);
-      border-radius:8px;
+      width:100%;min-height:48px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:10px;
       font-size:15px;font-family:inherit;
       color:var(--black);background:var(--white);
       outline:none;
@@ -109,7 +76,8 @@
       -webkit-appearance:none;
     }
     input::placeholder{color:var(--gray-400)}
-    input:focus{border-color:var(--yellow-dk);box-shadow:0 0 0 3px rgba(255,203,0,.15)}
+    input:focus{border-color:var(--yellow-dk);box-shadow:0 0 0 3px rgba(255,203,0,.18)}
+    .rc input:focus-visible + .rc-label,.cc input:focus-visible + .cc-label{outline:3px solid rgba(230,183,0,.5);outline-offset:2px}
     input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(208,52,44,.1)}
     .err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
 
@@ -119,8 +87,7 @@
     .rc input[type=radio]{position:absolute;opacity:0;width:0;height:0}
     .rc-label{
       display:flex;align-items:center;gap:8px;
-      padding:12px 14px;
-      border:1.5px solid var(--gray-200);border-radius:8px;
+      min-height:48px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:10px;
       font-size:13px;font-weight:500;color:var(--gray-800);
       cursor:pointer;transition:all .2s;user-select:none;
     }
@@ -155,7 +122,7 @@
     /* BUTTON */
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      width:100%;padding:15px 20px;border-radius:8px;
+      width:100%;min-height:54px;padding:15px 20px;border-radius:11px;
       font-size:15px;font-weight:700;border:none;cursor:pointer;
       font-family:inherit;transition:all .2s;letter-spacing:0.1px;
       margin-top:8px;
@@ -186,16 +153,12 @@
     .sum-k{font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
     .sum-v{font-size:13px;font-weight:500;color:var(--black);text-align:right}
 
-    footer{width:100%;text-align:center;padding:14px 20px 28px;font-size:11.5px;color:var(--gray-400)}
+    footer{width:100%;text-align:center;padding:8px 20px 30px;font-size:11.5px;color:var(--gray-600)}
     footer a{color:var(--gray-600);text-decoration:none}
 
-    @media(max-width:360px){
-      .header-logos{gap:14px}
-      .header-logo img{height:22px}
-      .idc-logo img{height:30px}
-      .logo-sep{height:26px}
-      .radio-grid,.chk-grid{grid-template-columns:1fr}
-    }
+    @media(max-width:480px){.header{padding-top:24px;padding-bottom:48px}.header-logos{gap:16px}.header-logo img{height:25px}.idc-logo img{height:34px}.card-body{padding:27px 22px 28px}}
+    @media(max-width:360px){.header-logos{gap:14px}.header-logo img{height:22px}.idc-logo img{height:30px}.logo-sep{height:26px}.radio-grid,.chk-grid{grid-template-columns:1fr}.card-body{padding:24px 18px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
@@ -207,6 +170,7 @@
     <div class="logo-sep"></div>
     <div class="idc-logo"><img src="idc-logo-2026.png" alt="Indocomtech"/></div>
   </div>
+  <p class="header-kicker">Form Registrasi Pengunjung <span>Indocomtech 2026</span></p>
 </header>
 
 <!-- CARD -->
@@ -216,7 +180,7 @@
 
     <!-- FORM -->
     <div id="scr-form">
-      <p class="form-title">Form Registrasi Pengunjung</p>
+      <h1 class="form-title">Form Registrasi Pengunjung</h1>
       <p class="form-sub">Isi data di bawah ini dan tim kami akan segera menghubungi Anda.</p>
 
       <!-- Data Diri -->
@@ -308,6 +272,7 @@
   const WA_ADMIN  = "6285771666931";
   let fd = {};
 
+  function escapeHTML(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
   function showErr(id, show){ document.getElementById(id).style.display = show ? 'block' : 'none'; }
   function markErr(el, err){ el.classList.toggle('err', err); }
 
@@ -375,7 +340,7 @@
       {k:'Kategori',   v: fd.kategori},
       {k:'Perusahaan', v: fd.perusahaan},
       {k:'Kebutuhan',  v: fd.produk},
-    ].map(r=>`<div class="sum-row"><span class="sum-k">${r.k}</span><span class="sum-v">${r.v}</span></div>`).join('');
+    ].map(r=>`<div class="sum-row"><span class="sum-k">${r.k}</span><span class="sum-v">${escapeHTML(r.v)}</span></div>`).join('');
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
