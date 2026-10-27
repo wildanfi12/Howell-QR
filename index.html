@@ -330,18 +330,23 @@
   function cleanSubmission(){
     if (!activeSubmission) return;
     clearTimeout(activeSubmission.timeout);
+    clearTimeout(activeSubmission.loadTimer);
     activeSubmission.form.remove();
     activeSubmission.frame.remove();
     activeSubmission = null;
   }
 
-  function showSubmitError(message){
+  function showSubmitError(message, allowRetry){
     isSubmitting = false;
     cleanSubmission();
     const error = document.getElementById('e-submit');
     error.textContent = message;
     error.style.display = 'block';
     setButtonLoading(false, true);
+    if (allowRetry === false){
+      document.getElementById('btn-sub').disabled = true;
+      document.getElementById('btn-txt').textContent = 'Periksa Data Dahulu';
+    }
   }
 
   function onSubmissionMessage(event){
@@ -350,6 +355,7 @@
     const response = event.data;
     if (!response || response.source !== 'howell-data-capture' || response.requestId !== fd.requestId) return;
     if (response.status === 'success'){
+      activeSubmission.acknowledged = true;
       isSubmitting = false;
       cleanSubmission();
       document.getElementById('e-submit').style.display = 'none';
@@ -359,6 +365,21 @@
     }
   }
   window.addEventListener('message', onSubmissionMessage);
+
+  function onSubmissionFrameLoad(frame){
+    if (!activeSubmission || activeSubmission.frame !== frame || activeSubmission.acknowledged) return;
+    try {
+      const frameUrl = frame.contentWindow.location.href;
+      if (frameUrl === 'about:blank' || new URL(frameUrl).origin === window.location.origin) return;
+    } catch (err) {
+      // A cross-origin response has loaded, but its body cannot be inspected safely.
+    }
+    const requestId = fd.requestId;
+    activeSubmission.loadTimer = setTimeout(() => {
+      if (!activeSubmission || activeSubmission.frame !== frame || activeSubmission.acknowledged || fd.requestId !== requestId) return;
+      showSubmitError('Server menerima respons, tetapi belum mengirim konfirmasi penyimpanan. Data mungkin sudah tercatat. Periksa spreadsheet atau hubungi tim Howell sebelum mengirim ulang.', false);
+    }, 500);
+  }
 
   function invalidateRequestId(){
     if (!isSubmitting) delete fd.requestId;
@@ -409,8 +430,10 @@
     activeSubmission = {
       frame,
       form,
+      acknowledged: false,
       timeout: setTimeout(() => showSubmitError('Status pengiriman belum dapat dipastikan. Hindari mengirim berulang kali; hubungi tim Howell untuk memastikan data Anda.'), SUBMISSION_TIMEOUT_MS)
     };
+    frame.addEventListener('load', () => onSubmissionFrameLoad(frame));
     frame.addEventListener('error', () => showSubmitError('Koneksi gagal. Periksa internet lalu coba lagi.'));
     form.submit();
   }

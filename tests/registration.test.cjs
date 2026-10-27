@@ -37,7 +37,7 @@ class FakeElement {
         return shouldAdd;
       }
     };
-    if (tagName === "iframe") this.contentWindow = {};
+    if (tagName === "iframe") this.contentWindow = { location: { href: "about:blank" } };
   }
   setAttribute(name, value) { this.attributes[name] = value; }
   addEventListener(name, handler) { this.listeners[name] = handler; }
@@ -240,6 +240,22 @@ test("unanswered request times out visibly and does not show a false success", a
   assert.equal(elements["e-submit"].style.display, "block");
   assert.match(elements["e-submit"].textContent, /belum dapat dipastikan/);
   assert.equal(elements["btn-sub"].disabled, false);
+});
+
+test("legacy cross-origin response is reported promptly without inviting a duplicate submit", async () => {
+  const { context, elements, body, timers } = makeClient();
+  await context.submitForm();
+  const frame = body.children.find(el => el.tagName === "iframe");
+  Object.defineProperty(frame.contentWindow, "location", {
+    get() { throw new Error("cross-origin frame"); }
+  });
+  frame.listeners.load();
+  const callback = [...timers.values()].at(-1);
+  callback();
+  assert.equal(elements["scr-success"].classList.contains("show"), false);
+  assert.equal(elements["btn-sub"].disabled, true);
+  assert.equal(elements["btn-txt"].textContent, "Periksa Data Dahulu");
+  assert.match(elements["e-submit"].textContent, /mungkin sudah tercatat/);
 });
 
 test("double submission is ignored while the first request is pending", async () => {
