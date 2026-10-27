@@ -274,10 +274,12 @@ test("unanswered request times out visibly and does not show a false success", a
   assert.equal(elements["btn-sub"].disabled, false);
 });
 
-test("legacy cross-origin response is reported promptly without inviting a duplicate submit", async () => {
-  const { context, elements, body, timers } = makeClient();
+test("late acknowledgement after iframe load still changes pending state to success", async () => {
+  const { context, elements, listeners, body, timers } = makeClient();
   await context.submitForm();
   const frame = body.children.find(el => el.tagName === "iframe");
+  const form = body.children.find(el => el.tagName === "form");
+  const requestId = form.children.find(field => field.name === "requestId").value;
   Object.defineProperty(frame.contentWindow, "location", {
     get() { throw new Error("cross-origin frame"); }
   });
@@ -286,8 +288,16 @@ test("legacy cross-origin response is reported promptly without inviting a dupli
   callback();
   assert.equal(elements["scr-success"].classList.contains("show"), false);
   assert.equal(elements["btn-sub"].disabled, true);
-  assert.equal(elements["btn-txt"].textContent, "Periksa Data Dahulu");
-  assert.match(elements["e-submit"].textContent, /mungkin sudah tercatat/);
+  assert.equal(elements["btn-txt"].textContent, "Memeriksa Status...");
+  assert.match(elements["e-submit"].textContent, /jangan kirim ulang dulu/);
+
+  listeners.message({
+    origin: "https://n-123abc-script.googleusercontent.com",
+    source: frame.contentWindow,
+    data: { source: "howell-data-capture", status: "success", requestId }
+  });
+  assert.equal(elements["scr-success"].classList.contains("show"), true);
+  assert.equal(frame.removed, true);
 });
 
 test("double submission is ignored while the first request is pending", async () => {
