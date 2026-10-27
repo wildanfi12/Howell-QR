@@ -241,7 +241,6 @@
       <button class="btn btn-primary" id="btn-sub" onclick="submitForm()">
         <span id="btn-txt">Kirim Data</span>
         <div class="spin" id="spin"></div>
-        <svg id="btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
       </button>
       <div class="err-msg" id="e-submit" role="alert" aria-live="polite"></div>
     </div>
@@ -325,7 +324,6 @@
     const btn = document.getElementById('btn-sub');
     btn.disabled = loading;
     document.getElementById('spin').style.display = loading ? 'block' : 'none';
-    document.getElementById('btn-ico').style.display = loading ? 'none' : '';
     document.getElementById('btn-txt').textContent = loading ? 'Mengirim...' : retry ? 'Coba Kirim Lagi' : 'Kirim Data';
   }
 
@@ -448,7 +446,6 @@
     const btn = document.getElementById('btn-sub');
     btn.disabled = false;
     document.getElementById('spin').style.display = 'none';
-    document.getElementById('btn-ico').style.display = '';
     document.getElementById('btn-txt').textContent = 'Kirim Data';
     window.scrollTo({top:0, behavior:'smooth'});
   }
