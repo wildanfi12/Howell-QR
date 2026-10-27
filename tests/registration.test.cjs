@@ -91,7 +91,7 @@ function makeClient() {
     scrollTo() {}
   };
   const context = {
-    document, window, crypto: webcrypto, console,
+    document, window, crypto: webcrypto, console, URL,
     setTimeout(callback) { const id = nextTimer++; timers.set(id, callback); return id; },
     clearTimeout(id) { timers.delete(id); },
     Date
@@ -229,6 +229,38 @@ test("failed server acknowledgement shows an error instead of success", async ()
   assert.equal(elements["scr-success"].classList.contains("show"), false);
   assert.equal(elements["e-submit"].style.display, "block");
   assert.equal(elements["btn-sub"].disabled, false);
+});
+
+test("sandboxed Apps Script acknowledgement with opaque origin is accepted only for the active request", async () => {
+  const { context, elements, listeners, body } = makeClient();
+  await context.submitForm();
+  const form = body.children.find(el => el.tagName === "form");
+  const requestId = form.children.find(field => field.name === "requestId").value;
+
+  listeners.message({
+    origin: "null",
+    data: { source: "howell-data-capture", status: "success", requestId: "wrong-request-id" }
+  });
+  assert.equal(elements["scr-success"].classList.contains("show"), false);
+
+  listeners.message({
+    origin: "null",
+    data: { source: "howell-data-capture", status: "success", requestId }
+  });
+  assert.equal(elements["scr-success"].classList.contains("show"), true);
+});
+
+test("Apps Script acknowledgement from its changing googleusercontent host is accepted", async () => {
+  const { context, elements, listeners, body } = makeClient();
+  await context.submitForm();
+  const form = body.children.find(el => el.tagName === "form");
+  const requestId = form.children.find(field => field.name === "requestId").value;
+
+  listeners.message({
+    origin: "https://n-123abc-script.googleusercontent.com",
+    data: { source: "howell-data-capture", status: "success", requestId }
+  });
+  assert.equal(elements["scr-success"].classList.contains("show"), true);
 });
 
 test("unanswered request times out visibly and does not show a false success", async () => {
