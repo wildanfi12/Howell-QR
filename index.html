@@ -80,6 +80,7 @@
     .rc input:focus-visible + .rc-label,.cc input:focus-visible + .cc-label{outline:3px solid rgba(230,183,0,.5);outline-offset:2px}
     input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(208,52,44,.1)}
     .err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
+    #e-submit{margin-top:12px;line-height:1.5}
 
     /* RADIO */
     .radio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -188,14 +189,14 @@
 
       <div class="field">
         <label for="nama">Nama Lengkap <span class="req">*</span></label>
-        <input type="text" id="nama" placeholder="" autocomplete="name"/>
+        <input type="text" id="nama" placeholder="" autocomplete="name" aria-required="true"/>
         <div class="err-msg" id="e-nama">Nama lengkap wajib diisi.</div>
       </div>
 
       <div class="field">
         <label for="wa">No. WhatsApp <span class="req">*</span></label>
-        <input type="tel" id="wa" placeholder="" inputmode="numeric" maxlength="16"/>
-        <div class="err-msg" id="e-wa">Nomor WhatsApp tidak valid (minimal 9 digit angka).</div>
+        <input type="tel" id="wa" placeholder="" inputmode="tel" maxlength="20" aria-required="true"/>
+        <div class="err-msg" id="e-wa" role="alert" aria-live="polite">Masukkan nomor WhatsApp Indonesia yang valid (08…, 628…, atau +62…).</div>
       </div>
 
       <!-- Profil Bisnis -->
@@ -214,7 +215,7 @@
 
       <div class="field">
         <label for="co">Nama Perusahaan / Badan Usaha <span class="req">*</span></label>
-        <input type="text" id="co" placeholder="" autocomplete="organization"/>
+        <input type="text" id="co" placeholder="" autocomplete="organization" aria-required="true"/>
         <div class="err-msg" id="e-co">Nama perusahaan wajib diisi.</div>
       </div>
 
@@ -242,6 +243,7 @@
         <div class="spin" id="spin"></div>
         <svg id="btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
       </button>
+      <div class="err-msg" id="e-submit" role="alert" aria-live="polite"></div>
     </div>
 
     <!-- SUCCESS -->
@@ -274,10 +276,17 @@
 
   function escapeHTML(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
   function showErr(id, show){ document.getElementById(id).style.display = show ? 'block' : 'none'; }
-  function markErr(el, err){ el.classList.toggle('err', err); }
+  function markErr(el, err){ el.classList.toggle('err', err); el.setAttribute('aria-invalid', String(err)); }
+
+  function normalizeWhatsApp(value){
+    const raw = String(value || '').trim();
+    if (!/^\+?[0-9\s().-]+$/.test(raw)) return '';
+    const digits = raw.replace(/\D/g, '');
+    const normalized = digits.startsWith('62') ? digits : digits.startsWith('0') ? '62' + digits.slice(1) : '';
+    return /^628[1-9]\d{6,10}$/.test(normalized) ? normalized : '';
+  }
 
   function validate(){
-    let ok = true;
     const n = document.getElementById('nama');
     const w = document.getElementById('wa');
     const k = document.querySelector('input[name="kat"]:checked');
@@ -285,8 +294,8 @@
     const pr = [...document.querySelectorAll('input[name="pr"]:checked')];
 
     const nOk = n.value.trim().length >= 2;
-    const cleanedWa = w.value.replace(/[^0-9]/g, '');
-    const wOk = cleanedWa.length >= 9 && cleanedWa.length <= 16;
+    const normalizedWa = normalizeWhatsApp(w.value);
+    const wOk = !!normalizedWa;
     const kOk = !!k;
     const cOk = c.value.trim().length >= 2;
     const prOk = pr.length > 0;
@@ -297,38 +306,115 @@
     markErr(c, !cOk); showErr('e-co', !cOk);
     showErr('e-pr', !prOk);
 
-    if(!nOk) { n.scrollIntoView({behavior:'smooth', block:'center'}); return false; }
-    if(!wOk) { w.scrollIntoView({behavior:'smooth', block:'center'}); return false; }
-    if(!kOk || !cOk || !prOk) ok = false;
+    if(!nOk) { n.focus(); n.scrollIntoView({behavior:'smooth', block:'center'}); return false; }
+    if(!wOk) { w.focus(); w.scrollIntoView({behavior:'smooth', block:'center'}); return false; }
     return nOk && wOk && kOk && cOk && prOk;
   }
 
-  async function submitForm(){
-    if(!validate()) return;
+  let activeSubmission = null;
+  let isSubmitting = false;
+  const SUBMISSION_TIMEOUT_MS = 25000;
+  const APPS_SCRIPT_RESPONSE_ORIGINS = new Set([
+    'https://script.google.com',
+    'https://script.googleusercontent.com',
+    'https://howellcable.site',
+    'https://registrasi.howellcable.site'
+  ]);
 
-    fd.nama       = document.getElementById('nama').value.trim();
-    fd.whatsapp   = document.getElementById('wa').value.trim();
-    fd.kategori   = document.querySelector('input[name="kat"]:checked').value;
-    fd.perusahaan = document.getElementById('co').value.trim();
-    fd.produk     = [...document.querySelectorAll('input[name="pr"]:checked')].map(c=>c.value).join(', ');
-    fd.timestamp  = new Date().toLocaleString('id-ID', {timeZone:'Asia/Jakarta'});
-    fd.event      = 'Indocomtech 2026';
-
+  function setButtonLoading(loading, retry){
     const btn = document.getElementById('btn-sub');
-    btn.disabled = true;
-    document.getElementById('spin').style.display = 'block';
-    document.getElementById('btn-ico').style.display = 'none';
-    document.getElementById('btn-txt').textContent = 'Mengirim...';
+    btn.disabled = loading;
+    document.getElementById('spin').style.display = loading ? 'block' : 'none';
+    document.getElementById('btn-ico').style.display = loading ? 'none' : '';
+    document.getElementById('btn-txt').textContent = loading ? 'Mengirim...' : retry ? 'Coba Kirim Lagi' : 'Kirim Data';
+  }
 
-    try {
-      await fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(fd)
-      });
-    } catch(e){}
-    showSuccess();
+  function cleanSubmission(){
+    if (!activeSubmission) return;
+    clearTimeout(activeSubmission.timeout);
+    activeSubmission.form.remove();
+    activeSubmission.frame.remove();
+    activeSubmission = null;
+  }
+
+  function showSubmitError(message){
+    isSubmitting = false;
+    cleanSubmission();
+    const error = document.getElementById('e-submit');
+    error.textContent = message;
+    error.style.display = 'block';
+    setButtonLoading(false, true);
+  }
+
+  function onSubmissionMessage(event){
+    if (!activeSubmission || !APPS_SCRIPT_RESPONSE_ORIGINS.has(event.origin)) return;
+    if (event.source !== activeSubmission.frame.contentWindow) return;
+    const response = event.data;
+    if (!response || response.source !== 'howell-data-capture' || response.requestId !== fd.requestId) return;
+    if (response.status === 'success'){
+      isSubmitting = false;
+      cleanSubmission();
+      document.getElementById('e-submit').style.display = 'none';
+      showSuccess();
+    } else if (response.status === 'error'){
+      showSubmitError('Data belum berhasil disimpan. Periksa koneksi lalu coba lagi.');
+    }
+  }
+  window.addEventListener('message', onSubmissionMessage);
+
+  function invalidateRequestId(){
+    if (!isSubmitting) delete fd.requestId;
+  }
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', invalidateRequestId);
+    input.addEventListener('change', invalidateRequestId);
+  });
+
+  async function submitForm(){
+    if (isSubmitting || !validate()) return;
+
+    fd.nama = document.getElementById('nama').value.trim();
+    fd.whatsapp = normalizeWhatsApp(document.getElementById('wa').value);
+    fd.kategori = document.querySelector('input[name="kat"]:checked').value;
+    fd.perusahaan = document.getElementById('co').value.trim();
+    fd.produk = [...document.querySelectorAll('input[name="pr"]:checked')].map(c => c.value).join(', ');
+    fd.timestamp = new Date().toLocaleString('id-ID', {timeZone:'Asia/Jakarta'});
+    fd.event = 'Indocomtech 2026';
+    fd.siteOrigin = window.location.origin;
+    fd.requestId = fd.requestId || crypto.randomUUID();
+
+    const frame = document.createElement('iframe');
+    frame.name = 'howell-submit-' + fd.requestId;
+    frame.title = 'Status pengiriman formulir';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.display = 'none';
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SHEET_URL;
+    form.target = frame.name;
+    form.style.display = 'none';
+    Object.keys(fd).forEach(key => {
+      const field = document.createElement('input');
+      field.type = 'hidden';
+      field.name = key;
+      field.value = fd[key];
+      form.appendChild(field);
+    });
+
+    const error = document.getElementById('e-submit');
+    error.textContent = '';
+    error.style.display = 'none';
+    isSubmitting = true;
+    setButtonLoading(true, false);
+    document.body.append(frame, form);
+    activeSubmission = {
+      frame,
+      form,
+      timeout: setTimeout(() => showSubmitError('Status pengiriman belum dapat dipastikan. Hindari mengirim berulang kali; hubungi tim Howell untuk memastikan data Anda.'), SUBMISSION_TIMEOUT_MS)
+    };
+    frame.addEventListener('error', () => showSubmitError('Koneksi gagal. Periksa internet lalu coba lagi.'));
+    form.submit();
   }
 
   function showSuccess(){
@@ -367,7 +453,7 @@
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  document.getElementById('wa').addEventListener('input', function(){ this.value = this.value.replace(/[^0-9\s]/g,''); });
+  document.getElementById('wa').addEventListener('input', function(){ this.value = this.value.replace(/[^0-9+]/g,'').replace(/(?!^)\+/g,''); });
 </script>
 </body>
 </html>
