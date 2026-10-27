@@ -320,6 +320,20 @@
     'https://registrasi.howellcable.site'
   ]);
 
+  function isTrustedSubmissionOrigin(origin){
+    if (origin === 'null' || APPS_SCRIPT_RESPONSE_ORIGINS.has(origin)) return true;
+    try {
+      const url = new URL(origin);
+      return url.protocol === 'https:' && (
+        url.hostname === 'script.googleusercontent.com' ||
+        url.hostname.endsWith('-script.googleusercontent.com') ||
+        url.hostname.endsWith('.script.googleusercontent.com')
+      );
+    } catch (err) {
+      return false;
+    }
+  }
+
   function setButtonLoading(loading, retry){
     const btn = document.getElementById('btn-sub');
     btn.disabled = loading;
@@ -350,12 +364,13 @@
   }
 
   function onSubmissionMessage(event){
-    if (!activeSubmission || !APPS_SCRIPT_RESPONSE_ORIGINS.has(event.origin)) return;
+    if (!activeSubmission) return;
     const response = event.data;
-    // Apps Script may wrap HtmlService output in an internal frame, so the
-    // message source can differ from the outer submission iframe. The strict
-    // origin allowlist plus the per-request UUID binds the acknowledgement.
+    // Apps Script may redirect HtmlService to a changing googleusercontent
+    // host or deliver through an opaque sandbox origin. The unpredictable ID
+    // of the active request binds either acknowledgement to this submission.
     if (!response || response.source !== 'howell-data-capture' || response.requestId !== fd.requestId) return;
+    if (!isTrustedSubmissionOrigin(event.origin)) return;
     if (response.status === 'success'){
       activeSubmission.acknowledged = true;
       isSubmitting = false;
