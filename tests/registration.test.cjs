@@ -384,6 +384,8 @@ test("acknowledgement targets the submitted Howell subdomain from the allowlist"
     parameter: Object.assign({}, lead, { siteOrigin: "https://registrasi.howellcable.site" })
   });
   assert.match(result.html, /"https:\/\/registrasi\.howellcable\.site"/);
+  assert.match(result.html, /window\.parent\.postMessage/);
+  assert.match(result.html, /window\.top\.postMessage/);
 });
 
 test("legacy JSON requests remain accepted by the updated endpoint", () => {

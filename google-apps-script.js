@@ -132,8 +132,12 @@ function acknowledgement_(status, requestId, siteOrigin) {
     status: status === "success" ? "success" : "error",
     requestId: requestId
   });
-  const html = '<!doctype html><html><body><script>window.parent.postMessage(' +
-    message + ', "' + (SITE_ORIGINS.includes(siteOrigin) ? siteOrigin : SITE_ORIGIN) + '");</scr' + 'ipt></body></html>';
+  const targetOrigin = SITE_ORIGINS.includes(siteOrigin) ? siteOrigin : SITE_ORIGIN;
+  const html = '<!doctype html><html><body><script>(function(){' +
+    'var payload=' + message + ';var targetOrigin=' + JSON.stringify(targetOrigin) + ';' +
+    'window.parent.postMessage(payload,targetOrigin);' +
+    'if(window.top!==window.parent)window.top.postMessage(payload,targetOrigin);' +
+    '})();</scr' + 'ipt></body></html>';
   return HtmlService.createHtmlOutput(html)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
