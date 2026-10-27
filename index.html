@@ -351,8 +351,10 @@
 
   function onSubmissionMessage(event){
     if (!activeSubmission || !APPS_SCRIPT_RESPONSE_ORIGINS.has(event.origin)) return;
-    if (event.source !== activeSubmission.frame.contentWindow) return;
     const response = event.data;
+    // Apps Script may wrap HtmlService output in an internal frame, so the
+    // message source can differ from the outer submission iframe. The strict
+    // origin allowlist plus the per-request UUID binds the acknowledgement.
     if (!response || response.source !== 'howell-data-capture' || response.requestId !== fd.requestId) return;
     if (response.status === 'success'){
       activeSubmission.acknowledged = true;

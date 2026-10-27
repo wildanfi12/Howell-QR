@@ -208,7 +208,7 @@ test("client sends canonical phone and waits for a trusted matching acknowledgem
 
   listeners.message({
     origin: "https://script.googleusercontent.com",
-    source: frame.contentWindow,
+    source: {},
     data: { source: "howell-data-capture", status: "success", requestId: fields.requestId }
   });
   assert.equal(elements["scr-success"].classList.contains("show"), true);
