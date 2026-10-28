@@ -38,6 +38,8 @@ Then open http://127.0.0.1:4173/ and use synthetic visitor details. The server b
 
 The Apps Script web app must return its fixed HTML acknowledgement from an iframe for the page to verify that a row was written. The response embeds only a fixed status and a request ID; it must not include visitor data. The iframe origin check and destination origin in the frontend and backend must remain synchronized. Script Cache provides best-effort deduplication for immediate retries; Google may evict cache entries early, so this is not a durable idempotency guarantee.
 
+The Apps Script checks the normalized WhatsApp number against column D of every existing data row while holding the script lock. A matching number returns `already_registered` and does not append a row. The spreadsheet is the source of truth, so deleting that registration row allows the number to register again. The request-ID cache remains only for idempotent retries; it is not used to decide phone eligibility. The frontend shows the 25% discount eligibility message for `already_registered` and does not show the success screen.
+
 ## Cache and performance notes
 
 There is no service worker, local build cache, or application cache in this repository. GitHub Pages and Google delivery cache headers are managed outside the repository and were not modified here. Do not cache registration submissions or visitor data. The page references only the Howell and Indocomtech logo files; the other repository images are not referenced by the page.

@@ -377,6 +377,8 @@
       cleanSubmission();
       document.getElementById('e-submit').style.display = 'none';
       showSuccess();
+    } else if (response.status === 'already_registered'){
+      showSubmitError('Nomor WhatsApp ini sudah pernah digunakan untuk registrasi. Satu nomor hanya dapat digunakan satu kali untuk memperoleh diskon 25%.');
     } else if (response.status === 'error'){
       showSubmitError('Data belum berhasil disimpan. Periksa koneksi lalu coba lagi.');
     }

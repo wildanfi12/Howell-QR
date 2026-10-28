@@ -101,15 +101,24 @@ function makeClient() {
 }
 
 function makeGas(options = {}) {
-  const rows = [];
+  const rows = (options.rows || []).map(row => row.slice());
   const cache = new Map();
+  const lockStats = { waits: 0, releases: 0 };
   const sheet = {
     appendRow(row) {
       if (options.failWrite) throw new Error("private spreadsheet failure details");
       rows.push(row);
     },
-    getRange() {
-      return { setBackground() {}, setFontColor() {}, setFontWeight() {} };
+    getLastRow() { return rows.length ? rows.length + 1 : 1; },
+    getRange(startRow, startColumn, rowCount, columnCount) {
+      return {
+        getDisplayValues() {
+          return Array.from({ length: rowCount }, (_, offset) => [
+            rows[startRow - 2 + offset]?.[startColumn - 1] ?? ""
+          ]);
+        },
+        setBackground() {}, setFontColor() {}, setFontWeight() {}
+      };
     },
     setFrozenRows() {}
   };
@@ -132,7 +141,10 @@ function makeGas(options = {}) {
     },
     LockService: {
       getScriptLock() {
-        return { waitLock() {}, releaseLock() {} };
+        return {
+          waitLock() { lockStats.waits += 1; },
+          releaseLock() { lockStats.releases += 1; }
+        };
       }
     },
     HtmlService: {
@@ -148,7 +160,7 @@ function makeGas(options = {}) {
     Date
   };
   vm.runInNewContext(gasSource, context, { filename: "google-apps-script.js" });
-  return { context, rows, cache };
+  return { context, rows, cache, lockStats };
 }
 
 const lead = {
@@ -228,6 +240,23 @@ test("failed server acknowledgement shows an error instead of success", async ()
   });
   assert.equal(elements["scr-success"].classList.contains("show"), false);
   assert.equal(elements["e-submit"].style.display, "block");
+  assert.equal(elements["btn-sub"].disabled, false);
+});
+
+test("already registered acknowledgement shows the discount eligibility message without success", async () => {
+  const { context, elements, listeners, body } = makeClient();
+  await context.submitForm();
+  const form = body.children.find(el => el.tagName === "form");
+  const requestId = form.children.find(field => field.name === "requestId").value;
+
+  listeners.message({
+    origin: "https://script.google.com",
+    data: { source: "howell-data-capture", status: "already_registered", requestId }
+  });
+
+  assert.equal(elements["scr-success"].classList.contains("show"), false);
+  assert.equal(elements["e-submit"].style.display, "block");
+  assert.match(elements["e-submit"].textContent, /satu kali untuk memperoleh diskon 25%/);
   assert.equal(elements["btn-sub"].disabled, false);
 });
 
@@ -372,6 +401,71 @@ test("Apps Script idempotency key prevents duplicate sheet rows", () => {
   const retry = context.doPost(event);
   assert.equal(rows.length, 1);
   assert.match(retry.html, /"status":"success"/);
+});
+
+test("duplicate WhatsApp is rejected when the stored number uses a different format", () => {
+  const existing = ["2026-10-27", "Indocomtech 2026", "Registrant One", "0812 3456-7890", "End User", "Company A", "HDMI"];
+  const { context, rows } = makeGas({ rows: [existing] });
+  const result = context.doPost({ parameter: Object.assign({}, lead, { requestId: "a2366f7a-f650-4ecf-9081-2e2b783e2e18" }) });
+
+  assert.equal(rows.length, 1);
+  assert.match(result.html, /"status":"already_registered"/);
+  assert.match(result.html, /"requestId":"a2366f7a-f650-4ecf-9081-2e2b783e2e18"/);
+});
+
+test("duplicate WhatsApp is rejected even when all other registration data changes", () => {
+  const existing = ["2026-10-27", "Indocomtech 2026", "Registrant One", "6281234567890", "End User", "Company A", "HDMI"];
+  const changedLead = Object.assign({}, lead, {
+    nama: "Registrant Two",
+    perusahaan: "Company B",
+    kategori: "Retailer",
+    produk: "Adapters",
+    requestId: "a2366f7a-f650-4ecf-9081-2e2b783e2e19"
+  });
+  const { context, rows } = makeGas({ rows: [existing] });
+  const result = context.doPost({ parameter: changedLead });
+
+  assert.equal(rows.length, 1);
+  assert.match(result.html, /"status":"already_registered"/);
+});
+
+test("a new WhatsApp number is saved when it does not exist in the sheet", () => {
+  const { context, rows } = makeGas();
+  const result = context.doPost({ parameter: lead });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0][3], "6281234567890");
+  assert.match(result.html, /"status":"success"/);
+});
+
+test("a WhatsApp number can register after its spreadsheet row is deleted", () => {
+  const existing = ["2026-10-27", "Indocomtech 2026", "Registrant One", "6281234567890", "End User", "Company A", "HDMI"];
+  const { context, rows } = makeGas({ rows: [existing] });
+  const duplicate = context.doPost({ parameter: Object.assign({}, lead, { requestId: "a2366f7a-f650-4ecf-9081-2e2b783e2e20" }) });
+  assert.match(duplicate.html, /"status":"already_registered"/);
+
+  rows.splice(0, 1);
+  const allowed = context.doPost({ parameter: Object.assign({}, lead, { requestId: "a2366f7a-f650-4ecf-9081-2e2b783e2e21" }) });
+  assert.equal(rows.length, 1);
+  assert.match(allowed.html, /"status":"success"/);
+});
+
+test("competing submissions with different request IDs and the same WhatsApp save only one row under the script lock", async () => {
+  const { context, rows, lockStats } = makeGas();
+  const first = Object.assign({}, lead, { requestId: "a2366f7a-f650-4ecf-9081-2b2e783e2e22" });
+  const second = Object.assign({}, lead, {
+    nama: "Registrant Two",
+    requestId: "a2366f7a-f650-4ecf-9081-2b2e783e2e23"
+  });
+  const results = await Promise.all([
+    Promise.resolve().then(() => context.doPost({ parameter: first })),
+    Promise.resolve().then(() => context.doPost({ parameter: second }))
+  ]);
+
+  assert.equal(rows.length, 1);
+  assert.equal(lockStats.waits, 2);
+  assert.equal(lockStats.releases, 2);
+  assert.deepEqual(results.map(result => result.html.match(/"status":"([^"]+)"/)[1]).sort(), ["already_registered", "success"]);
 });
 
 test("acknowledgements from either Apps Script browser origin are accepted", async () => {

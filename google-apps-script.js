@@ -57,6 +57,10 @@ function doPost(e) {
       sheet.setFrozenRows(1);
     }
 
+    if (hasRegisteredWhatsApp_(sheet, lead.whatsapp)) {
+      return acknowledgement_("already_registered", validRequestId ? requestId : "", siteOrigin);
+    }
+
     sheet.appendRow([
       new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }),
       "Indocomtech 2026",
@@ -75,6 +79,14 @@ function doPost(e) {
   } finally {
     try { lock.releaseLock(); } catch (err) {}
   }
+}
+
+function hasRegisteredWhatsApp_(sheet, normalizedWhatsApp) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+
+  const existingNumbers = sheet.getRange(2, 4, lastRow - 1, 1).getDisplayValues();
+  return existingNumbers.some(row => normalizeWhatsApp_(row[0]) === normalizedWhatsApp);
 }
 
 function readRequestData_(e) {
@@ -127,9 +139,10 @@ function safeSheetText_(value) {
 }
 
 function acknowledgement_(status, requestId, siteOrigin) {
+  const safeStatus = ["success", "error", "already_registered"].includes(status) ? status : "error";
   const message = JSON.stringify({
     source: "howell-data-capture",
-    status: status === "success" ? "success" : "error",
+    status: safeStatus,
     requestId: requestId
   });
   const targetOrigin = SITE_ORIGINS.includes(siteOrigin) ? siteOrigin : SITE_ORIGIN;
